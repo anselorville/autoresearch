@@ -1,0 +1,55 @@
+# Autoresearch pipeline configuration
+# Run: .venv\Scripts\python pipeline.py
+
+# 训练模式:
+#   pretrain — 预训练 GPT 模型 (train.py, 需要 GPU)
+#   sft      — Qwen3.5-0.8B 监督微调 (finetune.py, CPU 可用)
+#   lora     — Qwen3.5-0.8B LoRA 微调 (finetune_lora.py, CPU 可用)
+mode: lora
+
+# 自动研究循环次数
+# 每轮循环: LLM 提出修改 → 应用代码 → 训练 → 评估指标 → 保留或丢弃
+# LoRA CPU 估算: 每轮 24h ≈ 102 optimizer steps；5轮 + 1次baseline ≈ 6天
+n_loops: 5
+
+# 空跑模式
+# true  — 跳过实际训练，用随机 mock 指标验证整体流程
+# false — 正式运行
+dry_run: false
+
+# sft / lora 模式下每次实验的最大训练时长（小时）
+# 超时后训练脚本自动停止并输出当前最优 best_val_loss
+# LoRA CPU: ~844s/step → 24h ≈ 102 steps；完整一遍需 ~9 天
+time_budget_hours: 24.0
+
+# pretrain 模式下每次实验的训练时长（秒）
+# 对应 prepare.py 中的 TIME_BUDGET 常量，默认 300 秒（5 分钟）
+time_budget_sec: 300
+
+# 子进程强制终止的硬超时（秒）
+# 必须大于 time_budget_hours×3600 + 缓冲；24h + 1h buffer = 90000
+train_timeout_sec: 90000
+
+# 实验结果追加写入的 TSV 文件路径（相对于项目根目录）
+# 记录每轮的指标值、KEEP/DISCARD 状态和 git commit hash
+results_file: results.tsv
+
+# 每次实验完整训练日志的存放目录
+# 每轮生成一个独立文件，命名格式: loop<N>_<timestamp>.log
+log_dir: logs
+
+# LLM 客户端配置，对应 service/claude_client.py
+llm:
+  # Claude 网关地址，留空则使用 claude_client.py 中的 DEFAULT_URL
+  api_url: ""
+
+  # 使用的模型名称，留空则使用 claude_client.py 中的 DEFAULT_MODEL
+  api_model: ""
+
+  # LLM 输出随机性（0.0 ~ 1.0）
+  # 值越高提案越多样，值越低越保守稳定
+  temperature: 0.5
+
+  # LLM 单次响应最大 token 数
+  # 用于生成代码修改提案，建议不低于 2048
+  max_tokens: 4096
