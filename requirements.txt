@@ -1,0 +1,24 @@
+# ────────────────────────────────────────────────────────────────
+# AutoResearch — Qwen3.5-0.8B SFT / LoRA fine-tuning pipeline
+# Python >= 3.10
+#
+# CPU 安装（默认）:
+#   python -m venv .venv
+#   .venv\Scripts\pip install -r requirements.txt
+#
+# GPU 安装（CUDA 12.x）:
+#   .venv\Scripts\pip install -r requirements.txt \
+#       --extra-index-url https://download.pytorch.org/whl/cu124
+# ────────────────────────────────────────────────────────────────
+
+# ── 模型训练核心 ──────────────────────────────────────────────────
+torch>=2.1.0
+transformers>=5.5.0
+accelerate>=1.13.0
+safetensors>=0.7.0
+peft>=0.16.0          # LoRA / PEFT 适配器
+
+# ── Pipeline 工具 ─────────────────────────────────────────────────
+pyyaml>=6.0           # 解析 pipeline_config.yml
+matplotlib>=3.8.0     # 生成 progress.png 图表
+requests>=2.32.0      # claude_client.py / ner_client.py HTTP 请求
